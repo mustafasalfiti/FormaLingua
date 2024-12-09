@@ -14,12 +14,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Text Transformer',
+      title: 'FormaLingua',
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Text Transformer'),
-        ),
-        body: const TextTransformerWidget(),
+        body: Container(
+          child: const TextTransformerWidget(),
+          color: const Color.fromARGB(255, 247, 249, 249),
+          ),
       ),
     );
   }

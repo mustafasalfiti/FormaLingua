@@ -11,10 +11,12 @@ class SharedUtil {
 
   final List<String> currentLLMModel = ['Dummy', 'OpenAI'];
 
+  /// Copy the text to the clipboard
   static void copyToClipboard(String text) async {
     await Clipboard.setData(ClipboardData(text: text));
   }
 
+  /// Get the text from the clipboard
   Future<String> getCopiedText() async {
     final clipboardData = await Clipboard.getData('text/plain');
     return clipboardData?.text ?? '';

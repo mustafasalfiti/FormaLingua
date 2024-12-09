@@ -75,7 +75,8 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
           final selectedText = await WindowsUtil.getSelectedText();
           _updateTextController(selectedText);
           if (_pasteAutomatically) {
-            _transformText();
+            await _transformText();
+
             /// delay 150ms
             await Future.delayed(const Duration(milliseconds: 150));
             WindowsUtil.simulateCtrlV();
@@ -261,19 +262,33 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
                   ),
                 ),
               ),
-
               const SizedBox(width: 16),
-
-              // Generated Text Display
               Expanded(
                 child: TextField(
                   readOnly: true,
                   maxLines: 8,
                   controller: _updatedTextController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Generated Text',
                     alignLabelWithHint: true,
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 50), // Adjust this to position at the bottom
+                      child: Row(
+                        mainAxisSize: MainAxisSize
+                            .min, // Ensure Row takes only the required space
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              // Focus the previously active window and paste the content
+                              _focusAndPaste();
+                            },
+                            icon: const Icon(Icons.content_paste_go_outlined),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -294,13 +309,6 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
                   child: const Text('Transform Text'),
                 ),
                 const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    // Focus the previously active window and paste the content
-                    _focusAndPaste();
-                  },
-                  child: const Text('Paste'),
-                ),
               ],
             ),
           ),
