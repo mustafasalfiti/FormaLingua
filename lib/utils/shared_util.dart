@@ -5,6 +5,7 @@ class SharedUtil {
     "Please update the text with better grammar and formatting.",
     "Summarize the following text.",
     "Translate the following text to Spanish.",
+    "Translate the following text to English.",    
     "Rewrite the text to make it more formal.",
     "Simplify the text for a younger audience."
   ];
