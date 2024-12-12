@@ -3,9 +3,9 @@ import 'package:ffi/ffi.dart';
 import 'package:formalingua/utils/shared_util.dart';
 import 'package:win32/win32.dart';
 
-class  WindowsUtil {
-  static int lastFocusedWindow = 0;
-  static int flutterWindow = 0;
+class WindowsUtil {
+  static int _lastFocusedWindow = 0;
+  static int _flutterWindow = 0;
 
   /// Copy the selected text to the clipboard.
   static Future<void> copySelectedText() async {
@@ -18,21 +18,37 @@ class  WindowsUtil {
   }
 
   /// Get the handle of the foreground window.
-  static void initFlutterWindow() {
-    flutterWindow = GetForegroundWindow();
+  /// Save the current Flutter window handle
+  static void saveFlutterWindowHandle() {
+    // window title
+    const windowTitle = 'formalingua';
+
+    // Find the window by title
+    final windowTitlePointer = windowTitle.toNativeUtf16();
+    _flutterWindow = FindWindow(nullptr, windowTitlePointer);
+
+    if (_flutterWindow == 0) {
+      print('Failed to find window with title: $windowTitle');
+    } else {
+      print('Window handle saved: $_flutterWindow');
+    }
+
+    // Free the allocated memory
+    calloc.free(windowTitlePointer);
   }
 
   /// Method to focus on the flutter window
-   static void focusFlutterWindow() {
-    if (flutterWindow != 0) {
-      SetForegroundWindow(flutterWindow);
+  static void focusFlutterWindow() {
+    if (_flutterWindow != 0) {
+      ShowWindow(_flutterWindow, SHOW_WINDOW_CMD.SW_RESTORE);
+      SetForegroundWindow(_flutterWindow);
     } else {
       print('Flutter window handle is not set.');
     }
   }
 
   /// Simulate the Ctrl+V key combination to paste the copied text.
-   static void simulateCtrlV() {
+  static void simulateCtrlV() {
     // Create an array of INPUT structures
     final inputs = calloc<INPUT>(4);
 
@@ -103,9 +119,9 @@ class  WindowsUtil {
 
   /// Method to focus on the last window and simulate pasting
   static void focusAndPaste() {
-    if (lastFocusedWindow != 0) {
+    if (_lastFocusedWindow != 0) {
       // Bring the last focused window to the foreground
-      SetForegroundWindow(lastFocusedWindow);
+      SetForegroundWindow(_lastFocusedWindow);
       // Simulate pasting the clipboard content into the window
       simulateCtrlV();
     } else {
@@ -116,13 +132,13 @@ class  WindowsUtil {
   /// Method to run the commands to copy and paste the text
   static Future<String> getSelectedText() async {
     // set last focused window
-    lastFocusedWindow = GetForegroundWindow();
+    _lastFocusedWindow = GetForegroundWindow();
 
     copySelectedText();
     // delay 150ms
     await Future.delayed(const Duration(milliseconds: 150));
     // paste the copied text
-    return SharedUtil().getCopiedText();
+    return SharedUtil.getCopiedText();
   }
 
   // static String fetchWindowName() {
