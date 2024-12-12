@@ -50,7 +50,7 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
     super.initState();
 
     if (Platform.isWindows) {
-      WindowsUtil.initFlutterWindow();
+      WindowsUtil.saveFlutterWindowHandle();
     }
 
     _registerHotKey();
@@ -71,18 +71,24 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
           key: PhysicalKeyboardKey.keyN, modifiers: [HotKeyModifier.control]),
       keyDownHandler: (hotKey) async {
         if (Platform.isWindows) {
+          // store the saved text in the clipboard
+          String clipboardText = await SharedUtil.getCopiedText();
           print('Hot key pressed: Ctrl+N');
           final selectedText = await WindowsUtil.getSelectedText();
           _updateTextController(selectedText);
           if (_pasteAutomatically) {
             await _transformText();
+            SharedUtil.copyToClipboard(_updatedTextController.text);
 
             /// delay 150ms
             await Future.delayed(const Duration(milliseconds: 150));
             WindowsUtil.simulateCtrlV();
+            await Future.delayed(const Duration(milliseconds: 150));
           } else {
             WindowsUtil.focusFlutterWindow();
           }
+          // restore the saved text in the clipboard
+          SharedUtil.copyToClipboard(clipboardText);
         } else {
           print('Paste operation is not supported on this platform');
         }
@@ -107,13 +113,18 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
     setState(() {
       _updatedTextController.text = updatedText;
     });
-    SharedUtil.copyToClipboard(updatedText);
   }
 
   /// Focus the previously active window and paste the content
-  _focusAndPaste() {
+  _focusAndPaste() async {
     if (Platform.isWindows) {
+      // get pasted text
+      String clipboardText = await SharedUtil.getCopiedText();
+      SharedUtil.copyToClipboard(_updatedTextController.text);
       WindowsUtil.focusAndPaste();
+      await Future.delayed(const Duration(milliseconds: 150));
+      // restore the saved text in the clipboard
+      SharedUtil.copyToClipboard(clipboardText);
     } else {
       print('Paste operation is not supported on this platform');
     }

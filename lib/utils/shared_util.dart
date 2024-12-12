@@ -18,7 +18,7 @@ class SharedUtil {
   }
 
   /// Get the text from the clipboard
-  Future<String> getCopiedText() async {
+  static Future<String> getCopiedText() async {
     final clipboardData = await Clipboard.getData('text/plain');
     return clipboardData?.text ?? '';
   }
