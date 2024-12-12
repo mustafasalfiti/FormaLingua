@@ -279,27 +279,10 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
                   readOnly: true,
                   maxLines: 8,
                   controller: _updatedTextController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Generated Text',
                     alignLabelWithHint: true,
-                    border: const OutlineInputBorder(),
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 50), // Adjust this to position at the bottom
-                      child: Row(
-                        mainAxisSize: MainAxisSize
-                            .min, // Ensure Row takes only the required space
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              // Focus the previously active window and paste the content
-                              _focusAndPaste();
-                            },
-                            icon: const Icon(Icons.content_paste_go_outlined),
-                          ),
-                        ],
-                      ),
-                    ),
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -309,8 +292,10 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
           const SizedBox(height: 16),
 
           // Transform Button
-          Center(
+          SizedBox(
+            width: double.infinity,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
                   onPressed: () {
@@ -319,7 +304,13 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
                   },
                   child: const Text('Transform Text'),
                 ),
-                const SizedBox(width: 16),
+                IconButton(
+                  onPressed: () {
+                    // Focus the previously active window and paste the content
+                    _focusAndPaste();
+                  },
+                  icon: const Icon(Icons.content_paste_go_outlined),
+                ),
               ],
             ),
           ),
