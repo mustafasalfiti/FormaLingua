@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:formalingua/interfaces/llm_service.dart';
 import 'package:formalingua/services/dummy_service.dart';
 import 'package:formalingua/services/openapi_service.dart';
+import 'package:formalingua/utils/macos_util.dart';
 import 'package:formalingua/utils/shared_util.dart';
 import 'package:formalingua/utils/windows_util.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
@@ -90,7 +90,18 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
           // restore the saved text in the clipboard
           SharedUtil.copyToClipboard(clipboardText);
         } else {
-          print('Paste operation is not supported on this platform');
+          await MacOSUtil.copySelectedText();
+          await Future.delayed(const Duration(milliseconds: 150));
+          final clipboardText = await SharedUtil.getCopiedText();
+          if (clipboardText.isEmpty) {
+            return;
+          }
+
+          _updateTextController(clipboardText);
+          await _transformText();
+          SharedUtil.copyToClipboard(_updatedTextController.text);
+          await Future.delayed(const Duration(milliseconds: 150));
+          await MacOSUtil.pasteText();
         }
       },
     );
@@ -192,7 +203,7 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: selectedPrompt.isNotEmpty ? selectedPrompt : null,
+                  initialValue: selectedPrompt.isNotEmpty ? selectedPrompt : null,
                   decoration: const InputDecoration(
                     labelText: 'Select Operation',
                     border: OutlineInputBorder(),
@@ -215,7 +226,7 @@ class _TextTransformerWidgetState extends State<TextTransformerWidget> {
               const SizedBox(width: 16),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value:
+                  initialValue:
                       selectedLLMService.isNotEmpty ? selectedLLMService : null,
                   decoration: const InputDecoration(
                     labelText: 'Select Model',
